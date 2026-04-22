@@ -76,24 +76,25 @@ def handle_client(client_socket):
             # the remaining (size - 3) bytes and decode to a string.
             # Hint: use receive_n(). If nothing arrives, client disconnected — break.
             size_buffer = receive_n(client_socket, 3)
-            if not size_buffer:
+            if len(size_buffer) < 3:
                 print("Client disconnected.")
                 break
-            message_size = int(size_buffer.decode())
-            message_buffer = receive_n(client_socket, message_size - 3)
-            if not message_buffer:
-                print("Client disconnected while receiving message.")
+            message_len = int(size_buffer.decode())
+            if message_len <= 0 or message_len > 999:
+                print(f"Invalid message length: {message_len}. Closing connection.")
                 break
-            message = message_buffer.decode().strip()
+            body_bytes = receive_n(client_socket, message_len - 3)
+            
+            message = body_bytes.decode().strip()
 
 
             # Handle the request
-            response = handle_request(message_buffer)
+            response = handle_request(message)
 
             # TASK 2: Build the response string with its size prepended (3 digits + space),
             # then send it. Hint: total size = len(response) + 4. Use sendall().
-            response_message = f"{len(response) + 4:03d} {response}"
-            client_socket.sendall(response_message.encode())
+            resp_msg = f"{len(response):03d}{response}"
+            client_socket.sendall(resp_msg.encode())
             
     except (socket.error, ValueError):
         pass
