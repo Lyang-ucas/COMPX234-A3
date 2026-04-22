@@ -46,13 +46,11 @@ def main():
                     print(f"Error: Invalid READ format for line: {line}")
                     continue
                 msg_body = f"R {parts[1]}"
-                message = f"{len(msg_body) + 3:03d} {msg_body}"
             elif cmd == "GET":
                 if len(parts) < 2:
                     print(f"Error: Invalid GET format for line: {line}")
                     continue
                 msg_body = f"G {parts[1]}"
-                message = f"{len(msg_body) + 3:03d} {msg_body}"
             elif cmd == "PUT":
                 if len(parts) < 3:
                     print(f"Error: Invalid PUT format for line: {line}")
@@ -63,7 +61,6 @@ def main():
                     print(f"Error: Key and value length exceeds 970 characters for line: {line}")
                     continue
                 msg_body = f"P {key} {value}"
-                message = f"{len(msg_body) + 3:03d} {msg_body}"
             else:
                 print(f"Error: Invalid command format for line: {line}")
                 continue

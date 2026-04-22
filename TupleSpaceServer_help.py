@@ -83,8 +83,10 @@ def handle_client(client_socket):
             if message_len <= 0 or message_len > 999:
                 print(f"Invalid message length: {message_len}. Closing connection.")
                 break
-            body_bytes = receive_n(client_socket, message_len - 3)
-            
+            body_bytes = receive_n(client_socket, message_len)
+            if len(body_bytes) < message_len:
+                print("Client disconnected while sending message body.")
+                break
             message = body_bytes.decode().strip()
 
 
