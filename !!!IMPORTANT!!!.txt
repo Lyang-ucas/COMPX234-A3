@@ -1,0 +1,5 @@
+Sir, this project was developed on macOS. Please note the test files use an underscore `_` (e.g., `client_1.txt`) as downloaded from Canvas, and are located in the `test-workload` subdirectory. On Windows, use `python` instead of `python3`. The working commands are:
+
+python TupleSpaceServer.py 51234
+for i in {1..10}; do python TupleSpaceClient.py localhost 51234 test-workload/client_$i.txt; done
+for i in {1..10}; do python TupleSpaceClient.py localhost 51234 test-workload/client_$i.txt & done
