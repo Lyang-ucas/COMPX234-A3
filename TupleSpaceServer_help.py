@@ -123,6 +123,7 @@ def handle_request(message):
     with lock:
         if op == "R":
             # TASK 3: READ — look up key in tuple_space.
+            increment_stat("read_count")
             if key in tuple_space:
                 value = tuple_space[key]
                 return f"OK ({key}, {value}) read"
@@ -130,7 +131,6 @@ def handle_request(message):
                 return f"ERR {key} does not exist"
             
             # Return "OK (<key>, <value>) read" or "ERR <key> does not exist".
-            increment_stat("read_count")
 
 
 
@@ -138,15 +138,17 @@ def handle_request(message):
             # TASK 4: GET — remove key from tuple_space and return its value.
             # Return "OK (<key>, <value>) removed" or "ERR <key> does not exist".
             # Hint: dict.pop(key, None) removes and returns the value, or None if missing.
+            increment_stat("get_count")
             if key in tuple_space:
                 value = tuple_space.pop(key)
                 return f"OK ({key}, {value}) removed"
             else:
                 return f"ERR {key} does not exist"
-            increment_stat("get_count")
+
 
 
         elif op == "P":
+            increment_stat("put_count")
             if len(parts) < 3:
                 increment_stat("error_count")
                 return "ERR Invalid PUT"
@@ -154,13 +156,14 @@ def handle_request(message):
             # TASK 5: PUT — add (key, value) only if key does not already exist.
             # Validate: len(value) <= 999 and len(key + " " + value) <= 970.
             # Return "OK (<key>, <value>) added" or "ERR <key> already exists".
+            
             if key in tuple_space:
                 return f"ERR {key} already exists"
-            if len(value) > 999 or len(key) + len(value) > 970:
+            if len(value) > 999 or len(key) + len(value) + 1 > 970:
                 return "ERR Value too long"
             tuple_space[key] = value
             return f"OK ({key}, {value}) added"
-            increment_stat("put_count")
+
 
 
         else:
