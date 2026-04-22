@@ -42,27 +42,28 @@ def main():
             # Hint: for READ/GET, size = 6 + len(key). For PUT, size = 7 + len(key) + len(value).
             # Reject lines with invalid format or key+" "+value > 970 chars.
             if cmd == "READ" :
-                if len(parts) != 2:
+                if len(parts) < 2:
                     print(f"Error: Invalid READ format for line: {line}")
                     continue
-                key = parts[1]
-                message = f"{len(key) + 6:03d} R {key}"
+                msg_body = f"R {parts[1]}"
+                message = f"{len(msg_body) + 3:03d} {msg_body}"
             elif cmd == "GET":
-                if len(parts) != 2:
+                if len(parts) < 2:
                     print(f"Error: Invalid GET format for line: {line}")
                     continue
-                key = parts[1]
-                message = f"{len(key) + 6:03d} G {key}"
+                msg_body = f"G {parts[1]}"
+                message = f"{len(msg_body) + 3:03d} {msg_body}"
             elif cmd == "PUT":
-                if len(parts) != 3:
+                if len(parts) < 3:
                     print(f"Error: Invalid PUT format for line: {line}")
                     continue
                 key = parts[1]
                 value = parts[2]
-                if len(key) + len(value) > 970:
+                if len(key) + len(value) + 1 > 970:
                     print(f"Error: Key and value length exceeds 970 characters for line: {line}")
                     continue
-                message = f"{len(key) + len(value) + 7:03d} P {key} {value}"
+                msg_body = f"P {key} {value}"
+                message = f"{len(msg_body) + 3:03d} {msg_body}"
             else:
                 print(f"Error: Invalid command format for line: {line}")
                 continue
@@ -71,21 +72,21 @@ def main():
             # - Send:    sock.sendall(message.encode())
             # - Receive: first read 3 bytes to get the response size (like the server does).
             #            Then read the remaining (size - 3) bytes to get the response body.
-
+            message = f"{len(msg_body):03d} {msg_body}"
             sock.sendall(message.encode())
-            response_size_buffer = sock.recv(3)
-            if len(response_size_buffer) < 3:
+            len_bytes = sock.recv(3)
+            if len(len_bytes) < 3:
                 print(f"Error: Incomplete response size received for line: {line}")
-                continue
-            response_size = int(response_size_buffer.decode())
-            response_buffer = b""
-            while len(response_buffer) < response_size - 3:
-                chunk = sock.recv(response_size - 3 - len(response_buffer))
+                break
+            resp_size = int(len_bytes.decode())
+            resp_bytes = b""
+            while len(resp_bytes) < resp_size:
+                chunk = sock.recv(resp_size - len(resp_bytes))
                 if not chunk:
                     print(f"Error: Connection closed by server while receiving response for line: {line}") 
                     break
-                response_buffer += chunk                           # Keep reading until we get the full response body
-            response = response_buffer.decode().strip()
+                resp_bytes += chunk                           # Keep reading until we get the full response body
+            response = resp_bytes.decode().strip()
             print(f"{line}: {response}")
 
     except (socket.error, ValueError) as e:
