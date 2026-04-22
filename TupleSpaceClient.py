@@ -69,7 +69,7 @@ def main():
             # - Send:    sock.sendall(message.encode())
             # - Receive: first read 3 bytes to get the response size (like the server does).
             #            Then read the remaining (size - 3) bytes to get the response body.
-            message = f"{len(msg_body):03d} {msg_body}"
+            message = f"{len(msg_body):03d}{msg_body}"
             sock.sendall(message.encode())
             len_bytes = sock.recv(3)
             if len(len_bytes) < 3:
